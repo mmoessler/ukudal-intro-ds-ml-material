@@ -1,5 +1,3 @@
-
-
 # Session 01 — Introduction to Machine Learning for Agri-Food Systems
 
 ## Overview
