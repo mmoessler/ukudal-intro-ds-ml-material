@@ -14,7 +14,7 @@ By the end of this session, you should be able to:
 
 ## Feature engineering in context
 
-Feature engineering converts raw agrifood data—weather, soil, remote sensing, management, and pest observations—into variables that better represent the biological or management process we want to model.
+Feature engineering  (FE) converts raw agrifood data—weather, soil, remote sensing, management, and pest observations—into variables that better represent the biological or management process we want to model.
 
 A good feature should:
 
@@ -46,7 +46,7 @@ Where:
 
 **Agrifood rationale:** High temperature alone does not fully describe heat stress. At high humidity, evaporative cooling is reduced, so animals and crops may experience greater stress. THI is therefore more informative than temperature or humidity separately.
 
-**Practical note:** THI thresholds depend on the livestock species, breed, production system, and local adaptation. Treat fixed thresholds such as “THI > 79 means severe stress” as context-specific guidance, not universal rules.
+**Practical note:** THI thresholds depend on the livestock species, breed, production system, and local adaptation. Treat fixed thresholds such as "THI > 79 means severe stress" as context-specific guidance, not universal rules.
 
 ### Other useful interactions
 
@@ -63,21 +63,21 @@ Where:
 
 A ratio feature divides one variable by another to express a **per-unit** or **relative** measure.
 
-\[
+$$
 x_{\text{ratio}} = \frac{x_1}{x_2}
-\]
+$$
 
 ### Example: Nutrient balance
 
 A simple nitrogen-to-phosphorus ratio is:
 
-\[
+$$
 \text{N:P ratio} = \frac{N}{P}
-\]
+$$
 
 **Agrifood rationale:** Absolute nutrient amounts can be misleading. A field may have adequate nitrogen but still show poor nutrient balance if phosphorus is limiting. A ratio expresses the balance between nutrients.
 
-**Important correction:** Avoid adding an arbitrary constant such as `P + 1` unless the units require it or you are explicitly preventing division by zero. If \(P\) can be zero, use a documented safeguard, for example:
+**Important correction:** Avoid adding an arbitrary constant such as `P + 1` unless the units require it or you are explicitly preventing division by zero. If $P$ can be zero, use a documented safeguard, for example:
 
 ```python
 N_to_P = N / P.clip(lower=epsilon)
@@ -108,9 +108,9 @@ Aggregation features summarise several related variables into one meaningful met
 
 ### Example: Total nutrient availability
 
-\[
+$$
 \text{Total NPK} = N + P + K
-\]
+$$
 
 **Agrifood rationale:** A total nutrient score can provide a compact summary of overall nutrient availability.
 
@@ -139,33 +139,40 @@ Domain indices use established scientific relationships to summarise complex agr
 
 ### Example: Growing Degree Days (GDD)
 
-Daily GDD is commonly calculated as:
+- Daily GDD is commonly calculated as:
 
-\[
+$$
 GDD_{\text{daily}} =
 \max\left(
 \frac{T_{\max} + T_{\min}}{2} - T_{\text{base}},
 0
 \right)
-\]
+$$
 
 Accumulated GDD is:
 
-\[
+$$
 GDD_{\text{cumulative}} =
 \sum_{d=1}^{n} GDD_{\text{daily},d}
-\]
+$$
 
 Where:
 
-- \(T_{\max}\) = daily maximum temperature
-- \(T_{\min}\) = daily minimum temperature
-- \(T_{\text{base}}\) = crop- or pest-specific base temperature
+- $T_{\max}$ = daily maximum temperature
+- $T_{\min}$ = daily minimum temperature
+- $T_{\text{base}}$ = crop- or pest-specific base temperature
 - Negative daily values are set to zero
 
 **Agrifood rationale:** Crops and pests develop in response to accumulated heat, not simply calendar days. Cumulative GDD is widely used to estimate phenological stages, harvest timing, and pest development.
 
-**Important:** \(T_{\text{base}}\) is crop-specific. Some crop models also apply an upper temperature threshold, beyond which additional heat does not increase development.
+**Important:** $T_{\text{base}}$ is crop-specific. Some crop models also apply an upper temperature threshold, beyond which additional heat does not increase development.
+
+- Hourly GDD is commonly calculated as
+
+`max(Temp - T_base, 0)`
+
+
+
 
 ### Other domain indices
 
@@ -179,7 +186,7 @@ Where:
 
 ## 5. Categorical encoding
 
-Machine-learning models require numerical inputs, but the encoding method must match the type of category.
+ML models cannot read text; they require numerical inputs (numbers). Cateogrical encoding is the process of converting text-based or categorical data such as crop type, country, soil quality into numerical values before feeding them into ML models. There are different encoding methods and the one selected must match the type of category.
 
 ### Nominal encoding: one-hot encoding
 
@@ -213,9 +220,9 @@ Vegetative = 2
 Flowering = 3
 ```
 
-This preserves the agronomic progression from early to later development.
+The growth stage has a strict order. This preserves the agronomic progression from early to later development. We map them to 1, 2, 3 to preserver the mathematical order.
 
-**Caution:** Ordinal encoding implies equal spacing between categories unless you provide additional information. If the agronomic difference between stages is not uniform, consider one-hot encoding instead, especially for linear models.
+**Caution:** Ordinal encoding implies equal spacing between categories unless you provide additional information. If the agronomic difference between stages is not uniform, consider one-hot encoding instead, especially for linear models. 
 
 ### High-cardinality categories
 
@@ -228,7 +235,7 @@ For variables with many categories—such as farm ID, district, or crop variety�
 
 ## 6. Multicollinearity
 
-Multicollinearity occurs when predictor variables contain overlapping information. It can make coefficient estimates unstable in linear models and complicate interpretation.
+Adding features increases complexity. If two features contain the exact same information, the model gets confused. Multicollinearity occurs when predictor variables contain overlapping information. It can make coefficient estimates unstable in linear models and complicate interpretation.
 
 ### Examples in agrifood data
 
@@ -241,16 +248,16 @@ Multicollinearity occurs when predictor variables contain overlapping informatio
 
 Calculate pairwise correlations:
 
-\[
+$$
 r_{xy} =
 \frac{\operatorname{cov}(x,y)}
 {\sigma_x\sigma_y}
-\]
+$$
 
 A common screening rule is:
 
-- \(|r| > 0.85\): investigate redundancy.
-- \(|r| > 0.95\): strong redundancy; consider removing or combining one feature.
+- $|r| > 0.85$: investigate redundancy.
+- $|r| > 0.95$: strong redundancy; consider removing or combining one feature.
 
 **Important:** Correlation only detects **linear, pairwise** relationships. Two features can have low correlation but still be redundant through a nonlinear relationship.
 
@@ -258,12 +265,12 @@ A common screening rule is:
 
 VIF measures how much the variance of a regression coefficient is inflated by collinearity with other predictors.
 
-\[
+$
 VIF_j =
 \frac{1}{1 - R_j^2}
-\]
+$
 
-where \(R_j^2\) comes from regressing feature \(j\) on all other features.
+where $R_j^2$ comes from regressing feature $j$ on all other features.
 
 Common interpretation:
 
@@ -283,7 +290,7 @@ Common interpretation:
 
 ## 7. Avoiding data leakage
 
-Feature engineering can accidentally leak information from the validation or test set into training.
+FEeature engineering can accidentally leak information from the validation or test set into training.
 
 Follow these rules:
 
@@ -312,16 +319,4 @@ Define prediction target and prediction time
 
 ## Key takeaway
 
-Feature engineering is not about adding as many variables as possible. It is about representing agrifood knowledge—such as heat stress, nutrient balance, crop development, and water-use efficiency—in a form the model can use reliably and without leakage.
-```
-
-## Main improvements made
-
-- Corrected and clarified the **THI formula**, including the use of dry-bulb temperature and relative humidity.
-- Corrected **GDD**: it is normally calculated from daily maximum and minimum temperature, then accumulated over time; your original formula described only one day’s contribution.
-- Flagged the issue with `N / (P + 1)`: adding 1 is arbitrary unless justified as a division-by-zero safeguard.
-- Added caution that summing N, P, and K may not be agronomically meaningful because they are distinct nutrients.
-- Made the **dummy-variable trap** explanation more nuanced: dropping a category is model-dependent, not universally required.
-- Replaced the rigid “drop if \(|r| > 0.85\)” rule with a more defensible screening-and-investigation approach.
-- Added VIF interpretation, leakage prevention, high-cardinality encoding, and an iterative feature-engineering workflow.
-- Strengthened the agrifood relevance with examples involving yield, irrigation, pests, livestock, soil, and remote sensing. [cpc.ncep.noaa](https://www.cpc.ncep.noaa.gov/products/tools/cfsr/GDD.html)
+FE is not about adding as many variables as possible. It is about representing agrifood knowledge—such as heat stress, nutrient balance, crop development, and water-use efficiency—in a form the model can use reliably and without leakage.
